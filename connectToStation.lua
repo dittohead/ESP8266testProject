@@ -1,6 +1,5 @@
 wifi.setmode(wifi.STATION)
---wifi.sta.config("Yalantis", "743v6RRyal")
-wifi.sta.config ("Xiaomi", "fromchinawithlove")    
+wifi.sta.config ("Xiaomi", "********")    
 wifi.sta.connect()
 tmr.alarm(0, 1000, 1, function()
     if wifi.sta.getip() == nil then
