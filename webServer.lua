@@ -45,13 +45,17 @@ end
 
 srv=net.createServer(net.TCP)
 srv:listen(80,function(conn)
-brightness=adc.read(0)
-print("heap:"..node.heap())
+
+--print("heap:"..node.heap())
     conn:on("receive",function(conn,payload)
     --print(payload)
      if (string.find(payload, "GET /brightness HTTP/1.1") ~= nil) then
          --print("brightness request")
-         conn:send('{brightness:'..brightness..'}')
+         brightness=adc.read(0)
+         local voltage=brightness*0.9765625
+         print("voltage:"..voltage.."mV")
+         conn:send('<html>\r\n<head>\r\n<meta http-eqiv="Access-Control-Allow-Origin" content="*"/>\r\n</head>\r\n<body>\r\n'..'{brightness:'..brightness..'}'..'</body>\r\n</html>')
+         --conn:send('{brightness:'..brightness..'}')
          print("Brightness: "..brightness)
          conn:on("sent",function(conn) conn:close() end)
       elseif (string.find(payload, "GET /setled?") ~=nil) then
@@ -73,7 +77,7 @@ print("heap:"..node.heap())
         end
         if (string.match(vars, "b=[%d]+")==nil) then 
         print ("oops...blue nil")
-        blue=ble
+        blue=blue
         else
         blue=string.match(vars, "b=[%d]+")
         blue=string.match(blue,"[%d]+")
@@ -85,20 +89,25 @@ print("heap:"..node.heap())
         key=string.match(vars, "key=[%d]+")
         key=string.match(key,"[%d]+")
         end
-        print("founded color values \n red:"..red.."\n","green:".. green.."\n","blue:"..blue)
+        print("founded color values \n red:"..red.."\n","green:".. green.."\n","blue:"..blue.."\n", "key:"..key)
         resp=setLEDs(red, green, blue,key)
-        print("sended responce code"..resp)
-        conn:send(resp)
+        print("sended responce code:"..resp)
+        conn:send('<html>\r\n<head>\r\n<meta http-eqiv="Access-Control-Allow-Origin" content="*"/>\r\n</head>\r\n<body>\r\n'..resp..'</body>\r\n</html>')
+        --conn:send(resp)
         conn:on("sent",function(conn) conn:close() end)
+		red=0
+		green=0
+		blue=0
+		key=0
         collectgarbage()
 
         else
-         print("Oops...404;(")
+         --print("Oops...404;(")
          conn:send('404')
          conn:on("sent",function(conn) conn:close() end)
-         print("heap:"..node.heap())
+         --print("heap:"..node.heap())
          collectgarbage()
-         print("heap cleared:"..node.heap())
+         --print("heap cleared:"..node.heap())
         end
        
         end)
