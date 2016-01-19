@@ -23,10 +23,10 @@ if (key==keyLocal) then
     pwm.setduty(greenPin,checkPWMrange(g))
     pwm.setduty(bluePin,checkPWMrange(b))
     collectgarbage()
-    return(200)
+    return("200 OK")
     else
     collectgarbage()
-    return(403)
+    return("403 Forbidden")
 end
 end
 
@@ -42,7 +42,6 @@ end
 return(val)
 end
 
-
 srv=net.createServer(net.TCP)
 srv:listen(80,function(conn)
 
@@ -54,37 +53,46 @@ srv:listen(80,function(conn)
          brightness=adc.read(0)
          local voltage=brightness*0.9765625
          print("voltage:"..voltage.."mV")
-         conn:send('<html>\r\n<head>\r\n<meta http-eqiv="Access-Control-Allow-Origin" content="*"/>\r\n</head>\r\n<body>\r\n'..'{brightness:'..brightness..'}'..'</body>\r\n</html>')
-         --conn:send('{brightness:'..brightness..'}')
+         conn:send("HTTP/ 1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\n"
+         .."Content-Type: application/json\r\n\r\n"
+         .."{brightness:"..brightness.."}")
          print("Brightness: "..brightness)
          conn:on("sent",function(conn) conn:close() end)
-      elseif (string.find(payload, "GET /setled?") ~=nil) then
-        local _, _, method, path, vars = string.find(payload, "([A-Z]+) (.+)%?(.+) HTTP");
-        print(method, path, vars)
+        elseif (string.find(payload, "GET /setled?") ~=nil) then
+          local _, _, method, path, vars = string.find(payload, "([A-Z]+) (.+)%?(.+) HTTP");
+          print(method, path, vars)
+            if (vars==nil) then 
+                vars=""
+            end
         if (string.match(vars, "r=[%d]+")==nil) then 
-        print ("oops...red nil")
-        red=red
+            print ("oops...red nil")
+            red=red
         else
-        red=string.match(vars, "r=[%d]+")
-        red=string.match(red,"[%d]+")
+            red=string.match(vars, "r=[%d]+")
+            red=string.match(red,"[%d]+")
         end
+        
         if (string.match(vars, "g=[%d]+")==nil) then 
-        print ("oops...green nil")
-        green=green
+            print ("oops...green nil")
+            green=green
         else
-        green=string.match(vars, "g=[%d]+")
-        green=string.match(green,"[%d]+")
+            green=string.match(vars, "g=[%d]+")
+            green=string.match(green,"[%d]+")
         end
         if (string.match(vars, "b=[%d]+")==nil) then 
-        print ("oops...blue nil")
-        blue=blue
+            print ("oops...blue nil")
+            blue=blue
         else
-        blue=string.match(vars, "b=[%d]+")
-        blue=string.match(blue,"[%d]+")
+            blue=string.match(vars, "b=[%d]+")
+            blue=string.match(blue,"[%d]+")
         end
         if (string.match(vars, "key=[%d]+")==nil) then 
         print ("oops... keynil")
-        conn:send('403')
+        key=0
+        conn:send("HTTP/ 1.1 403 Forbidden\r\nAccess-Control-Allow-Origin: *\r\n"
+         .."Content-Type: text/html\r\n\r\n"
+         .."403")
+        conn:on("sent",function(conn) conn:close() end)
         else
         key=string.match(vars, "key=[%d]+")
         key=string.match(key,"[%d]+")
@@ -92,27 +100,28 @@ srv:listen(80,function(conn)
         print("founded color values \n red:"..red.."\n","green:".. green.."\n","blue:"..blue.."\n", "key:"..key)
         resp=setLEDs(red, green, blue,key)
         print("sended responce code:"..resp)
-        conn:send('<html>\r\n<head>\r\n<meta http-eqiv="Access-Control-Allow-Origin" content="*"/>\r\n</head>\r\n<body>\r\n'..resp..'</body>\r\n</html>')
-        --conn:send(resp)
+        conn:send("HTTP/ 1.1"..resp.."\r\nAccess-Control-Allow-Origin: *\r\n"
+        .."Content-Type: text/html\r\n\r\n"
+        ..resp)
         conn:on("sent",function(conn) conn:close() end)
 		red=0
 		green=0
 		blue=0
 		key=0
         collectgarbage()
-
+        elseif (string.find(payload, "GET / HTTP/1.1") ~= nil) then
+        conn:send('hello world')
+        conn:on("sent",function(conn) conn:close() end)
         else
-         --print("Oops...404;(")
-         conn:send('404')
-         conn:on("sent",function(conn) conn:close() end)
-         --print("heap:"..node.heap())
-         collectgarbage()
-         --print("heap cleared:"..node.heap())
-        end
-       
+        conn:send("HTTP/ 1.1 404 Not Found\r\nAccess-Control-Allow-Origin: *\r\n"
+        .."Content-Type: text/html\r\n\r\n"
+        .."404")
+        conn:on("sent",function(conn) conn:close() end)
+        --print("heap:"..node.heap())
+        collectgarbage()
+        --print("heap cleared:"..node.heap())     
+        end    
         end)
        end)
 -- conn:on("sent",function(conn) conn:close() end)
  
---collectgarbage()
-
