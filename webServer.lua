@@ -53,7 +53,7 @@ srv:listen(80,function(conn)
          brightness=adc.read(0)
          local voltage=brightness*0.9765625
          print("voltage:"..voltage.."mV")
-         conn:send("HTTP/ 1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\n"
+         conn:send("HTTP/1.1".." 200 OK\r\nAccess-Control-Allow-Origin: *\r\n"
          .."Content-Type: application/json\r\n\r\n"
          .."{brightness:"..brightness.."}")
          print("Brightness: "..brightness)
@@ -89,7 +89,7 @@ srv:listen(80,function(conn)
         if (string.match(vars, "key=[%d]+")==nil) then 
         print ("oops... keynil")
         key=0
-        conn:send("HTTP/ 1.1 403 Forbidden\r\nAccess-Control-Allow-Origin: *\r\n"
+        conn:send("HTTP/1.1".."403 Forbidden\r\nAccess-Control-Allow-Origin: *\r\n"
          .."Content-Type: text/html\r\n\r\n"
          .."403")
         conn:on("sent",function(conn) conn:close() end)
@@ -100,7 +100,7 @@ srv:listen(80,function(conn)
         print("founded color values \n red:"..red.."\n","green:".. green.."\n","blue:"..blue.."\n", "key:"..key)
         resp=setLEDs(red, green, blue,key)
         print("sended responce code:"..resp)
-        conn:send("HTTP/ 1.1"..resp.."\r\nAccess-Control-Allow-Origin: *\r\n"
+        conn:send("HTTP/1.1 "..resp.."\r\nAccess-Control-Allow-Origin: *\r\n"
         .."Content-Type: text/html\r\n\r\n"
         ..resp)
         conn:on("sent",function(conn) conn:close() end)
