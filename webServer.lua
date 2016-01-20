@@ -13,9 +13,13 @@ green=0
 
 function setLEDs(r,g,b,key)
 key=tonumber(key)
+local rVoltage=3.3*r/1023
+local gVoltage=3.3*r/1023
+local bVoltage=3.3*r/1023
 if (key==keyLocal) then 
-    print("setLEDs")
-    print("red:"..r.."\n","green:".. g.."\n","blue:"..b)
+    print('set LEDs:\nred:'..rVoltage..'\n'
+        ..'green:'..gVoltage..'\n'
+        ..'blue:'..bVoltage..'\n')
     pwm.start(redPin)
     pwm.start(greenPin)
     pwm.start(bluePin)
@@ -49,13 +53,12 @@ srv:listen(80,function(conn)
     conn:on("receive",function(conn,payload)
     --print(payload)
      if (string.find(payload, "GET /brightness HTTP/1.1") ~= nil) then
-         --print("brightness request")
          brightness=adc.read(0)
          local voltage=brightness*0.9765625
-         print("voltage:"..voltage.."mV")
-         conn:send("HTTP/1.1".." 200 OK\r\nAccess-Control-Allow-Origin: *\r\n"
-         .."Content-Type: application/json\r\n\r\n"
-         .."{brightness:"..brightness.."}")
+         print('voltage:'..voltage..'mV')
+         conn:send('HTTP/1.1'..' 200 OK\r\nAccess-Control-Allow-Origin: *\r\n'
+         ..'Content-Type: application/json\r\n\r\n'
+         ..'{"brightness":'..brightness..'}')
          print("Brightness: "..brightness)
          conn:on("sent",function(conn) conn:close() end)
         elseif (string.find(payload, "GET /setled?") ~=nil) then
@@ -97,9 +100,9 @@ srv:listen(80,function(conn)
         key=string.match(vars, "key=[%d]+")
         key=string.match(key,"[%d]+")
         end
-        print("founded color values \n red:"..red.."\n","green:".. green.."\n","blue:"..blue.."\n", "key:"..key)
+        print("founded color values\nred:"..red.."\ngreen:".. green.."\nblue:"..blue.."\nkey:"..key..'\n')
         resp=setLEDs(red, green, blue,key)
-        print("sended responce code:"..resp)
+        print("sended responce code:"..resp..'\n')
         conn:send("HTTP/1.1 "..resp.."\r\nAccess-Control-Allow-Origin: *\r\n"
         .."Content-Type: text/html\r\n\r\n"
         ..resp)
