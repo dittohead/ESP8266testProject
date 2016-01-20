@@ -1,8 +1,8 @@
 brightness=0
 keyLocal=1243
-redPin = 1
-greenPin = 2
-bluePin= 3
+redPin = 2 --GPIO4 62r
+greenPin = 1 --GPIO5 15r
+bluePin= 3 --GPIO0
 pwm.setup(redPin, 1000, 0) --initial PMW setups
 pwm.setup(greenPin, 1000, 0)
 pwm.setup(bluePin, 1000, 0)
